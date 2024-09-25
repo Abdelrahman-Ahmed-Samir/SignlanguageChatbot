@@ -53,8 +53,7 @@ current_letter = None
 letter_start_time = None
 
 # Initialize video capture
-cap = cv2.VideoCapture(0)
-
+cap = cv2.VideoCapture(1)
 # Process video if the start button is clicked
 if start_button:
     # Start processing video
