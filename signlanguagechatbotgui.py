@@ -55,6 +55,8 @@ letter_start_time = None
 # Initialize video capture
 cap = cv2.VideoCapture(0)
 
+# Your other code above remains unchanged
+
 if start_button:
     # Start processing video
     frame_placeholder = st.empty()  # Placeholder for video frames
@@ -105,7 +107,6 @@ if start_button:
                     if time.time() - letter_start_time > letter_confirmation_time:
                         sign_string += current_letter  # Confirm the letter
                         current_letter = None  # Reset the current letter after confirming
-                        confirmed_letters_box.text(f"Confirmed letters: {sign_string}")  # Display confirmed letters
                 else:
                     # New letter detected
                     current_letter = predicted_character
@@ -127,20 +128,17 @@ if start_button:
             if time.time() - last_sign_time > inactive_threshold:
                 if sign_string and sign_string[-1] != " ":  # Prevent multiple spaces
                     sign_string += " "  # Add space after inactivity
-                    confirmed_letters_box.text(f"Confirmed letters: {sign_string}")  # Display confirmed letters
                     last_sign_time = time.time()
 
         # Show the video stream in Streamlit
         frame_placeholder.image(frame, channels="BGR")
 
         # Send the accumulated words to the chatbot after inactivity
-        if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
+        if time.time() - last_sign_time > chatbot_response_threshold and sign_string:
             response = genai.GenerativeModel(model_name="gemini-1.5-flash").generate_content(sign_string.strip())
             chatbox.text(f"Chatbot response: {response.text}")
             sign_string = ""  # Clear sign string after processing
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
     cap.release()
+
     cv2.destroyAllWindows()
