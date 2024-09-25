@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf'
 genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
 
 # Load the sign language model
-model_dict = pickle.load(open('C:/Users/Adelrahman/.spyder-py3/model.p', 'rb'))
+model_dict = pickle.load(open('model.p', 'rb'))
 model = model_dict['model']
 
 # Initialize MediaPipe Hands
