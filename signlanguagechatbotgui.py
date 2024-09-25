@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf'
 genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
 
 # Load the sign language model
-model_dict = pickle.load(open('model.p', 'rb'))
+model_dict = pickle.load(open('C:/Users/Adelrahman/.spyder-py3/model.p', 'rb'))
 model = model_dict['model']
 
 # Initialize MediaPipe Hands
@@ -53,8 +53,8 @@ current_letter = None
 letter_start_time = None
 
 # Initialize video capture
-cap = cv2.VideoCapture(1)
-# Process video if the start button is clicked
+cap = cv2.VideoCapture(0)
+
 if start_button:
     # Start processing video
     frame_placeholder = st.empty()  # Placeholder for video frames
@@ -62,7 +62,6 @@ if start_button:
     while stop_button == False:
         ret, frame = cap.read()
         if not ret:
-            st.error("Failed to capture video. Please check your webcam.")
             break
 
         data_aux = []
@@ -106,6 +105,7 @@ if start_button:
                     if time.time() - letter_start_time > letter_confirmation_time:
                         sign_string += current_letter  # Confirm the letter
                         current_letter = None  # Reset the current letter after confirming
+                        confirmed_letters_box.text(f"Confirmed letters: {sign_string}")  # Display confirmed letters
                 else:
                     # New letter detected
                     current_letter = predicted_character
@@ -127,15 +127,20 @@ if start_button:
             if time.time() - last_sign_time > inactive_threshold:
                 if sign_string and sign_string[-1] != " ":  # Prevent multiple spaces
                     sign_string += " "  # Add space after inactivity
+                    confirmed_letters_box.text(f"Confirmed letters: {sign_string}")  # Display confirmed letters
                     last_sign_time = time.time()
 
         # Show the video stream in Streamlit
         frame_placeholder.image(frame, channels="BGR")
 
         # Send the accumulated words to the chatbot after inactivity
-        if time.time() - last_sign_time > chatbot_response_threshold and sign_string:
+        if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
             response = genai.GenerativeModel(model_name="gemini-1.5-flash").generate_content(sign_string.strip())
             chatbox.text(f"Chatbot response: {response.text}")
             sign_string = ""  # Clear sign string after processing
 
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
     cap.release()
+    cv2.destroyAllWindows()
