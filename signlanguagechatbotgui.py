@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf')
 
 # Configure the Google Generative AI API
-genai.configure(api_key=os.environ['AIzaSyAC0WNBI6H1ss4o8D4pMUNn2yTZANNJlMo'])
+genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
 
 # Load the sign language model
 model_dict = pickle.load(open('model.p', 'rb'))
