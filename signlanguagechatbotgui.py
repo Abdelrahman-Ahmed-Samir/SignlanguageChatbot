@@ -55,8 +55,7 @@ letter_start_time = None
 # Initialize video capture
 cap = cv2.VideoCapture(0)
 
-# Your other code above remains unchanged
-
+# Process video if the start button is clicked
 if start_button:
     # Start processing video
     frame_placeholder = st.empty()  # Placeholder for video frames
@@ -64,6 +63,7 @@ if start_button:
     while stop_button == False:
         ret, frame = cap.read()
         if not ret:
+            st.error("Failed to capture video. Please check your webcam.")
             break
 
         data_aux = []
@@ -140,5 +140,3 @@ if start_button:
             sign_string = ""  # Clear sign string after processing
 
     cap.release()
-
-    cv2.destroyAllWindows()
