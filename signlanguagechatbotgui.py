@@ -123,27 +123,35 @@ class VideoTransformer(VideoTransformerBase):
 
 
 # Start the webcam stream using streamlit-webrtc
-webrtc_ctx = webrtc_streamer(
-    key="example",
-    mode=WebRtcMode.SENDRECV,
-    video_processor_factory=VideoTransformer,
-    media_stream_constraints={
-        "video": True,
-        "audio": False  # Disable audio if not needed
-    },
-    async_processing=True,  # Run the video processing asynchronously
-)
-
+try:
+    webrtc_ctx = webrtc_streamer(
+        key="example",
+        mode=WebRtcMode.SENDRECV,
+        video_processor_factory=VideoTransformer,
+        media_stream_constraints={
+            "video": True,
+            "audio": False  # Disable audio if not needed
+        },
+        async_processing=True,  # Run the video processing asynchronously
+    )
+except Exception as e:
+    st.error(f"Error starting the webcam: {e}")
 
 # Display detected letters and handle chatbot response
-if webrtc_ctx.state.playing:
+if webrtc_ctx and webrtc_ctx.state.playing:
     labels_placeholder = st.empty()
     while True:
-        sign_string = result_queue.get()
-        confirmed_letters_box.text(f"Confirmed letters: {sign_string}")
+        try:
+            sign_string = result_queue.get()
+            confirmed_letters_box.text(f"Confirmed letters: {sign_string}")
 
-        # Send the accumulated words to the chatbot after inactivity
-        if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
-            response = genai.GenerativeModel(model_name="gemini-1.5-flash").generate_content(sign_string.strip())
-            chatbox.text(f"Chatbot response: {response.text}")
-            sign_string = ""  # Clear sign string after processing
+            # Send the accumulated words to the chatbot after inactivity
+            if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
+                response = genai.GenerativeModel(model_name="gemini-1.5-flash").generate_content(sign_string.strip())
+                chatbox.text(f"Chatbot response: {response.text}")
+                sign_string = ""  # Clear sign string after processing
+
+        except queue.Empty:
+            continue
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
