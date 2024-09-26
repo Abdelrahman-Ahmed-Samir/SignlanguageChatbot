@@ -4,3 +4,4 @@ mediapipe
 numpy
 google-generativeai  # Include any other dependencies you are using
 scikit-learn
+streamlit-webrtc
