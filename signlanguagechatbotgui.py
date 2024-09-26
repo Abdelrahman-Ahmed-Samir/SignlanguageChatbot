@@ -120,7 +120,18 @@ class VideoTransformer(VideoTransformerBase):
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 # Start the webcam stream using streamlit-webrtc
-webrtc_streamer(key="example", video_processor_factory=VideoTransformer)
+#webrtc_streamer(key="example", video_processor_factory=VideoTransformer)
+
+webrtc_streamer(
+    key="example",
+    video_processor_factory=VideoTransformer,
+    media_stream_constraints={
+        "video": True,
+        "audio": False  # Disable audio if not needed
+    },
+    async_processing=True,  # Run the video processing asynchronously
+)
+
 
 # Send the accumulated words to the chatbot after inactivity
 if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
