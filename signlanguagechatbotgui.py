@@ -7,6 +7,7 @@ import time
 import google.generativeai as genai
 import os
 import warnings
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
 # Suppress warnings related to protobuf
 warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf')
@@ -39,10 +40,6 @@ st.text("Use the webcam to sign and see the chatbot response below!")
 chatbox = st.empty()
 confirmed_letters_box = st.empty()  # Box for displaying confirmed letters
 
-# Button to start/stop webcam
-start_button = st.button('Start Webcam')
-stop_button = st.button('Stop Webcam')
-
 # Variables
 sign_string = ""  # To store the detected letters
 last_sign_time = time.time()  # Timer for inactivity
@@ -52,23 +49,21 @@ letter_confirmation_time = 3  # Seconds to confirm the same letter
 current_letter = None
 letter_start_time = None
 
-# Initialize video capture
-cap = cv2.VideoCapture(0)
+# Video transformer class for processing the video stream
+class VideoTransformer(VideoTransformerBase):
+    def __init__(self):
+        self.sign_string = ""
+        self.current_letter = None
+        self.letter_start_time = None
+        self.last_sign_time = time.time()
 
-if start_button:
-    # Start processing video
-    frame_placeholder = st.empty()  # Placeholder for video frames
-
-    while stop_button == False:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
+    def recv(self, frame):
+        img = frame.to_ndarray(format="bgr24")
         data_aux = []
         x_ = []
         y_ = []
-        H, W, _ = frame.shape
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        H, W, _ = img.shape
+        frame_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         # Process the frame using MediaPipe Hands
         results = hands.process(frame_rgb)
@@ -76,7 +71,7 @@ if start_button:
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 mp_drawing.draw_landmarks(
-                    frame,
+                    img,
                     hand_landmarks,
                     mp_hands.HAND_CONNECTIONS,
                     mp_drawing_styles.get_default_hand_landmarks_style(),
@@ -100,16 +95,15 @@ if start_button:
                 predicted_character = labels_dict[int(prediction[0])]
 
                 # Check if the predicted letter is the same as the current letter
-                if predicted_character == current_letter:
-                    # Confirm the letter if the same letter is held for the confirmation time
-                    if time.time() - letter_start_time > letter_confirmation_time:
-                        sign_string += current_letter  # Confirm the letter
-                        current_letter = None  # Reset the current letter after confirming
-                        confirmed_letters_box.text(f"Confirmed letters: {sign_string}")  # Display confirmed letters
+                if predicted_character == self.current_letter:
+                    if time.time() - self.letter_start_time > letter_confirmation_time:
+                        self.sign_string += self.current_letter  # Confirm the letter
+                        self.current_letter = None  # Reset after confirming
+                        confirmed_letters_box.text(f"Confirmed letters: {self.sign_string}")
                 else:
                     # New letter detected
-                    current_letter = predicted_character
-                    letter_start_time = time.time()  # Reset timer for new letter
+                    self.current_letter = predicted_character
+                    self.letter_start_time = time.time()
 
                 # Draw bounding box and the predicted letter on the frame
                 x1 = int(min(x_) * W) - 10
@@ -117,30 +111,18 @@ if start_button:
                 x2 = int(max(x_) * W) - 10
                 y2 = int(max(y_) * H) - 10
                 
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 4)
-                cv2.putText(frame, predicted_character, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 0), 3,
+                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 0), 4)
+                cv2.putText(img, predicted_character, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 0), 3,
                             cv2.LINE_AA)
-                last_sign_time = time.time()  # Reset last sign time
+                self.last_sign_time = time.time()
 
-        else:
-            # If no hand is detected, check for inactivity
-            if time.time() - last_sign_time > inactive_threshold:
-                if sign_string and sign_string[-1] != " ":  # Prevent multiple spaces
-                    sign_string += " "  # Add space after inactivity
-                    confirmed_letters_box.text(f"Confirmed letters: {sign_string}")  # Display confirmed letters
-                    last_sign_time = time.time()
+        return av.VideoFrame.from_ndarray(img, format="bgr24")
 
-        # Show the video stream in Streamlit
-        frame_placeholder.image(frame, channels="BGR")
+# Start the webcam stream using streamlit-webrtc
+webrtc_streamer(key="sign-recognition", video_transformer_factory=VideoTransformer)
 
-        # Send the accumulated words to the chatbot after inactivity
-        if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
-            response = genai.GenerativeModel(model_name="gemini-1.5-flash").generate_content(sign_string.strip())
-            chatbox.text(f"Chatbot response: {response.text}")
-            sign_string = ""  # Clear sign string after processing
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
+# Send the accumulated words to the chatbot after inactivity
+if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
+    response = genai.GenerativeModel(model_name="gemini-1.5-flash").generate_content(sign_string.strip())
+    chatbox.text(f"Chatbot response: {response.text}")
+    sign_string = ""  # Clear sign string after processing
