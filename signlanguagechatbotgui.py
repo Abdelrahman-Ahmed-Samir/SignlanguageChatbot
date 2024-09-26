@@ -7,6 +7,7 @@ import time
 import google.generativeai as genai
 import os
 import warnings
+import av
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
 # Suppress warnings related to protobuf
@@ -24,7 +25,7 @@ mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 
-hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
+hands = mp_hands.Hands(static_image_mode=False, min_detection_confidence=0.3, min_tracking_confidence=0.5)
 
 # Mapping of labels (A-Y)
 labels_dict = {i: chr(65 + i) for i in range(25)}  # A to Y
@@ -119,7 +120,7 @@ class VideoTransformer(VideoTransformerBase):
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 # Start the webcam stream using streamlit-webrtc
-webrtc_streamer(key="example", video_processor_factory=YourProcessor)
+webrtc_streamer(key="example", video_processor_factory=VideoTransformer)
 
 # Send the accumulated words to the chatbot after inactivity
 if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
