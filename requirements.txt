@@ -1,9 +1,9 @@
-streamlit>=1.15.2  # Ensure compatibility with streamlit-webrtc
+streamlit  # Ensure compatibility with streamlit-webrtc
 opencv-python-headless
 mediapipe
 numpy
 google-generativeai  # Include any other dependencies you are using
-scikit-learn
+scikit-learn==1.4.2
 streamlit-webrtc==0.45.0
 aioice==0.7.6
 aiortc==1.3.2  # WebRTC implementation in Python
