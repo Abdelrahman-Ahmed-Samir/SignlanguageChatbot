@@ -8,7 +8,8 @@ import google.generativeai as genai
 import os
 import warnings
 import av
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
+import queue
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, VideoTransformerBase
 
 # Suppress warnings related to protobuf
 warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf')
@@ -47,10 +48,11 @@ last_sign_time = time.time()  # Timer for inactivity
 inactive_threshold = 3  # Seconds to wait before adding a space
 chatbot_response_threshold = 5  # Seconds to wait before sending to chatbot
 letter_confirmation_time = 3  # Seconds to confirm the same letter
-current_letter = None
-letter_start_time = None
 
-# Video transformer class for processing the video stream
+# Result queue for thread-safe communication
+result_queue = queue.Queue()
+
+
 class VideoTransformer(VideoTransformerBase):
     def __init__(self):
         self.sign_string = ""
@@ -100,7 +102,7 @@ class VideoTransformer(VideoTransformerBase):
                     if time.time() - self.letter_start_time > letter_confirmation_time:
                         self.sign_string += self.current_letter  # Confirm the letter
                         self.current_letter = None  # Reset after confirming
-                        confirmed_letters_box.text(f"Confirmed letters: {self.sign_string}")
+                        result_queue.put(self.sign_string)  # Thread-safe update
                 else:
                     # New letter detected
                     self.current_letter = predicted_character
@@ -119,11 +121,11 @@ class VideoTransformer(VideoTransformerBase):
 
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
-# Start the webcam stream using streamlit-webrtc
-#webrtc_streamer(key="example", video_processor_factory=VideoTransformer)
 
-webrtc_streamer(
+# Start the webcam stream using streamlit-webrtc
+webrtc_ctx = webrtc_streamer(
     key="example",
+    mode=WebRtcMode.SENDRECV,
     video_processor_factory=VideoTransformer,
     media_stream_constraints={
         "video": True,
@@ -133,8 +135,15 @@ webrtc_streamer(
 )
 
 
-# Send the accumulated words to the chatbot after inactivity
-if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
-    response = genai.GenerativeModel(model_name="gemini-1.5-flash").generate_content(sign_string.strip())
-    chatbox.text(f"Chatbot response: {response.text}")
-    sign_string = ""  # Clear sign string after processing
+# Display detected letters and handle chatbot response
+if webrtc_ctx.state.playing:
+    labels_placeholder = st.empty()
+    while True:
+        sign_string = result_queue.get()
+        confirmed_letters_box.text(f"Confirmed letters: {sign_string}")
+
+        # Send the accumulated words to the chatbot after inactivity
+        if time.time() - last_sign_time > chatbot_response_threshold and sign_string.strip():
+            response = genai.GenerativeModel(model_name="gemini-1.5-flash").generate_content(sign_string.strip())
+            chatbox.text(f"Chatbot response: {response.text}")
+            sign_string = ""  # Clear sign string after processing
