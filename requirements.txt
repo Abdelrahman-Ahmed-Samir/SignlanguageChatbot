@@ -3,7 +3,7 @@ opencv-python-headless
 mediapipe
 numpy
 google-generativeai  # Include any other dependencies you are using
-scikit-learn==1.4.2
-streamlit-webrtc==0.45.0
-aioice==0.7.6
-aiortc==1.3.2  # WebRTC implementation in Python
+scikit-learn
+streamlit-webrtc
+aioice
+aiortc  # WebRTC implementation in Python
