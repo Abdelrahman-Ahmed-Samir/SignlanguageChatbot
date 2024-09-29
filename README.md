@@ -98,8 +98,11 @@ The model used in this project is trained to recognize 29 classes (A-Z, space, d
 - Capturing hand sign images.
 - Extracting hand landmarks using **MediaPipe**.
 - Training a machine learning model on these features to predict the sign.
-
-While this repository does not include the model training process, you can train your own model by capturing hand gestures and following a similar feature extraction and classification approach.
+  
+**To run the Train_Model.py**:
+   ```bash
+   python Train_Model.py
+  ```
 
 ## Model Inference
 
