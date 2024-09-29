@@ -48,6 +48,7 @@ The model supports:
 ├── create_dataset.py       # Script to create a dataset and save it to a pickle file
 ├── inference.py            # Inference script to test sign language recognition without chatbot
 ├── inference_with_chatbot.py # Inference script to test sign recognition with chatbot interaction
+├── Train_Model.py # Train script to train the model on sign language dataset for recognition
 ```
 ## Key Files
 
