@@ -8,6 +8,7 @@ This project is a real-time **Sign Language Recognition System** that converts s
 - [How It Works](#how-it-works)
 - [Project Structure](#project-structure)
 - [Model Training](#model-training)
+- [Model Inference](#model-Inference)
 - [Setup and Installation](#setup-and-installation)
 - [Usage](#usage)
 - [Technologies Used](#technologies-used)
@@ -59,6 +60,34 @@ The model used in this project is trained to recognize 29 classes (A-Z, space, d
 - Training a machine learning model on these features to predict the sign.
 
 While this repository does not include the model training process, you can train your own model by capturing hand gestures and following a similar feature extraction and classification approach.
+
+## Model Inference
+
+This project provides two separate inference scripts for testing the sign language recognition system:
+
+1. **inference.py**: This script is used to test the sign language recognition model independently, without the chatbot. It captures real-time hand gestures, predicts the corresponding sign, and displays the predicted output.
+
+   **To run the inference for sign language recognition**:
+   ```bash
+   python inference.py
+Functionality: It opens a webcam feed, detects hand gestures using MediaPipe, and displays the recognized letter (A-Z, space, delete) in real-time.
+Usage Scenario: Use this script if you're only interested in testing the sign recognition model without chatbot interaction.
+
+2. **inference_with_chatbot.py**: This script tests the sign language recognition model integrated with the Google Generative AI chatbot. After detecting and recognizing a sign language sequence, the system sends the recognized string to the chatbot, which responds in real-time.
+
+To run the inference with the chatbot:
+```bash
+   python inference_with_chatbot.py
+```
+Functionality: It opens a webcam feed, detects hand gestures, and predicts the corresponding sign. After forming a sentence, it sends the string to the Google Generative AI chatbot, which responds to the signed text.
+Usage Scenario: Use this script when you want to test both sign language recognition and chatbot interaction in real-time.
+Key Feature: Once a sentence is formed and confirmed, the chatbot responds after 5 seconds of inactivity.
+
+
+### Explanation:
+- Each file is described with its purpose, command to run, functionality, and appropriate use case.
+- The differences between the two inference scripts are clearly highlighted, so users know which one to use based on their goals.
+
 
 ## Setup and Installation
 
