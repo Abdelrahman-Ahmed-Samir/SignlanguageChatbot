@@ -7,13 +7,13 @@ This project is a real-time **Sign Language Recognition System** that converts s
 - [Features](#features)
 - [How It Works](#how-it-works)
 - [Project Structure](#project-structure)
+- [Data Collection](#data-collection)
 - [Model Training](#model-training)
-- [Model Inference](#model-Inference)
+- [Model Inference](#model-inference)
 - [Setup and Installation](#setup-and-installation)
 - [Usage](#usage)
 - [Technologies Used](#technologies-used)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Overview
 The **Sign Language Chatbot** project aims to bridge the communication gap between people who use sign language and those who don’t understand it. It captures hand signs via webcam, predicts the corresponding letter using a machine learning model, and sends the complete text to a chatbot powered by Google Generative AI for interaction.
@@ -27,7 +27,7 @@ The model supports:
 - **Confirmation Timer**: Ensures that signs are confirmed only after holding the gesture for a set duration (3 seconds for letters, 2 seconds for space and delete).
 - **Chatbot Interaction**: Converts detected letters into a string and sends it to a chatbot API to generate meaningful responses.
 - **Webcam Integration**: Live feed from the webcam processes the hand gestures in real-time.
-  
+
 ## How It Works
 1. **Sign Detection**: Using MediaPipe's Hand module, the hand landmarks are detected in real-time.
 2. **Prediction**: These landmarks are fed into a pre-trained machine learning model that predicts the signed letter (A-Z, space, delete).
@@ -42,6 +42,10 @@ The model supports:
 ├── model.p                 # The pre-trained model for sign language recognition (loaded using pickle)
 ├── main.py                 # Main application file to run the real-time sign recognition and chatbot interaction
 ├── requirements.txt        # Dependencies and libraries needed for the project
+├── collect_imgs.py         # Script to collect images for hand signs
+├── create_dataset.py       # Script to create a dataset and save it to a pickle file
+├── inference.py            # Inference script to test sign language recognition without chatbot
+├── inference_with_chatbot.py # Inference script to test sign recognition with chatbot interaction
 ```
 ## Key Files
 
@@ -50,6 +54,39 @@ The model supports:
 - **`requirements.txt`**: This file lists all the dependencies required to run the project. You can install them using:
   ```bash
   pip install -r requirements.txt
+
+## Data Collection
+
+This project includes two files to help create a dataset of hand signs for training the sign language recognition model:
+
+1. **collect_imgs.py**: This script captures real-time images of hand signs using the webcam. It allows you to manually collect images for each sign (A-Z, space, delete), which are then saved locally for further processing.
+
+   **To run the image collection script**:
+   ```bash
+   python collect_imgs.py
+Functionality:
+Opens a webcam feed for real-time hand sign capture.
+Allows you to manually label and save images for each sign gesture (A-Z, space, delete).
+The images are saved in separate folders, each representing a specific sign.
+Usage Scenario: Use this script to collect your own hand sign data for model training.
+
+2. **create_dataset.py**: This script processes the collected hand sign images and creates a dataset by extracting landmarks (using MediaPipe) from the images. The processed dataset is saved as a pickle file for easy use during model training.
+
+To run the dataset creation script:
+```bash
+  python create_dataset.py
+```
+Functionality:
+Reads the images collected by collect_imgs.py.
+Extracts hand landmarks from each image using MediaPipe.
+Saves the processed data (landmarks and labels) into a pickle file (dataset.pkl), which can be used for training the machine learning model.
+Usage Scenario: After collecting hand sign images, use this script to create the dataset by extracting features and storing them in a format ready for model training.
+
+
+### Explanation:
+- Each file is described with its purpose, command to run, functionality, and usage scenario.
+- The workflow explains the sequential process of collecting images and then creating a dataset, giving users a clear understanding of how to use the scripts.
+
 
 ## Model Training
 
