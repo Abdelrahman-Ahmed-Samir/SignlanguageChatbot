@@ -155,7 +155,7 @@ Key Feature: Once a sentence is formed and confirmed, the chatbot responds after
 
 3. Set up the Google Generative AI API by obtaining an API key and storing it in an environment variable:
     ```bash
-    export GOOGLE_API_KEY='your_google_api_key'
+    export GOOGLE_API_KEY='your_gemini_api_key'
     ```
 
 4. Run the application:
