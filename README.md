@@ -4,7 +4,7 @@ This project is a real-time **Sign Language Recognition System** that converts s
 
 # Demo
 click on thumbnail to watch the demo
-[![Watch the demo](https://img.youtube.com/vi/a8_PHeJ6Yps/maxresdefault.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Watch the demo](https://img.youtube.com/vi/a8_PHeJ6Yps/maxresdefault.jpg)](https://www.youtube.com/watch?v=a8_PHeJ6Yps)
 
 
 ## Table of Contents
