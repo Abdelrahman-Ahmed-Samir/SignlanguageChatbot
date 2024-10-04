@@ -2,6 +2,11 @@
 
 This project is a real-time **Sign Language Recognition System** that converts sign language gestures (A-Z, space, and delete) into text. The system uses MediaPipe for hand landmark detection and a custom-trained machine learning model to recognize each sign. It also integrates with the Google Generative AI to simulate a chatbot that responds to the text formed by the recognized sign language.
 
+# Demo
+click on thumbnail to watch the demo
+[![Watch the demo](https://img.youtube.com/vi/a8_PHeJ6Yps/maxresdefault.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
