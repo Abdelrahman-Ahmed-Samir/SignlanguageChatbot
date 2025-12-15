@@ -14,30 +14,11 @@ data = data_dict['data']  # List of landmark data
 labels = np.asarray(data_dict['labels'])  # Corresponding labels
 
 # Define the fixed number of points (landmarks) we want
-fixed_length = 42  # Example: 21 landmarks, each with x and y coordinates (21 * 2 = 42)
+fixed_length = 42  # 21 landmarks, each with x and y coordinates (21 * 2 = 42)
 
-# Function to interpolate landmark data to a fixed length
-def interpolate_landmarks(landmarks, fixed_length):
-    current_length = len(landmarks)
-    
-    if current_length == fixed_length:
-        return landmarks
-    
-    x = np.linspace(0, 1, num=current_length)
-    x_new = np.linspace(0, 1, num=fixed_length)
-
-    # Interpolate for x and y values separately
-    landmarks = np.array(landmarks)
-    f = interp1d(x, landmarks, axis=0, fill_value="extrapolate")
-    landmarks_interpolated = f(x_new)
-    
-    return landmarks_interpolated
-
-# Interpolate each sequence of landmarks
-processed_data = [interpolate_landmarks(d, fixed_length) for d in data]
 
 # Convert to numpy arrays for model training
-data_array = np.asarray(processed_data)
+data_array = np.asarray(data)
 labels_array = np.asarray(labels)
 
 print(f"Processed data shape: {data_array.shape}")
